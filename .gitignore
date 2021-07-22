@@ -1,0 +1,14 @@
+*
+!.gitignore
+!.gitkeep
+!Makefile
+!*.c
+!*.h
+!srcs
+!srcs/*/
+!includes
+!auto_test.sh
+!tests
+!tests/**
+!Libft
+sharedlib*
