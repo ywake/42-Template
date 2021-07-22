@@ -11,7 +11,7 @@ B_SRCS	:= main_bonus.c
 B_OBJS	:= $(B_SRCS:%.c=$(SRCDIR)%.o)
 B_FLG	:= .bonus_flg
 
-.PHONY: all clean fclean re bonus test
+.PHONY: all clean fclean re bonus norm leak leak_bonus tests
 
 all: $(NAME)
 
@@ -23,12 +23,12 @@ $(LIBFT): ./Libft/*.c
 	cp ./Libft/libft.a ./libft.a
 
 $(NAME):  $(LIBFT) $(OBJS)
-	$(CC) $(LIBS) $(OBJS) -o $(NAME)
+	$(CC) $(CFLAGS) $(LIBS) $(OBJS) -o $(NAME)
 
 bonus: $(B_FLG)
 
 $(B_FLG): $(LIBFT) $(B_OBJS)
-	$(CC) $(LIBS) $(B_OBJS) -o $(NAME)
+	$(CC) $(CFLAGS) $(LIBS) $(B_OBJS) -o $(NAME)
 
 clean:
 	$(MAKE) clean -C ./Libft
@@ -45,10 +45,10 @@ norm:
 	|| printf "\e[32m%s\n\e[m" "Norm OK!"; printf "\e[m"
 
 leak: $(LIBFT) $(OBJS)
-	$(CC) $(LIBS) $(OBJS) ./tests/sharedlib.c -o $(NAME)
+	$(CC) $(CFLAGS) $(LIBS) $(OBJS) ./tests/sharedlib.c -o $(NAME)
 
-bonus_leak: $(LIBFT) $(B_OBJS)
-	$(CC) $(LIBS) $(B_OBJS) ./tests/sharedlib.c -o $(B_NAME)
+leak_bonus: $(LIBFT) $(B_OBJS)
+	$(CC) $(CFLAGS) $(LIBS) $(B_OBJS) ./tests/sharedlib.c -o $(B_NAME)
 
 tests: leak
 	bash auto_test.sh $(TEST)\
