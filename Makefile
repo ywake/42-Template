@@ -50,6 +50,6 @@ leak: $(LIBFT) $(OBJS)
 bonus_leak: $(LIBFT) $(B_OBJS)
 	$(CC) $(LIBS) $(B_OBJS) ./tests/sharedlib.c -o $(B_NAME)
 
-test: leak
+tests: leak
 	bash auto_test.sh $(TEST)\
 	&& $(MAKE) norm
