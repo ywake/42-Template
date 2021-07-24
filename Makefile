@@ -35,6 +35,7 @@ clean:
 	rm -f $(OBJS) $(B_OBJS)
 
 fclean: clean
+	$(MAKE) fclean -C ./Libft
 	rm -f libft.a
 	rm -f $(NAME)
 
