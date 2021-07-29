@@ -30,6 +30,18 @@ jobs:
       # Runs a single command using the runners shell
       # アクションの終了コードの設定 - GitHub Docs => 終了ステータス0以外ならfailureが出ます。
       # https://docs.github.com/ja/actions/creating-actions/setting-exit-codes-for-actions
+      - name: Install Norminette.
+        run: |
+          python3 -m pip install --upgrade pip setuptools
+          python3 -m pip install norminette==3.2.8
+
+      - name: get sharedlib
+        run:  curl https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/b33b82eff13485337d06ada1407b3262efbc7142/sharedlib.c |
+              sed 's/so_long/pipex/' > tests/sharedlib.c
+
+      - name: get Libft
+        run:  git submodule update --init
+
       - name: Run Test.
         run: make tests
 
