@@ -33,11 +33,7 @@ jobs:
       - name: Install Norminette.
         run: |
           python3 -m pip install --upgrade pip setuptools
-          python3 -m pip install norminette==3.2.8
-
-      - name: get sharedlib
-        run:  curl https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/b33b82eff13485337d06ada1407b3262efbc7142/sharedlib.c |
-              sed 's/so_long/pipex/' > tests/sharedlib.c
+          python3 -m pip install norminette==3.3.2
 
       - name: get Libft
         run:  git submodule update --init

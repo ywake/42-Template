@@ -8,10 +8,11 @@
 !*.c
 !*.h
 !srcs
-!srcs/*/
+!srcs/**
+!objs
 !includes
 !auto_test.sh
 !tests
 !tests/**
 !Libft
-sharedlib*
+destructor.c
