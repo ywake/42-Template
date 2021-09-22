@@ -40,26 +40,33 @@ clean:
 fclean: clean
 	$(MAKE) fclean -C ./Libft
 	rm -f $(NAME) $(B_NAME)
+	rm -rf $(NAME).dSYM $(B_NAME).dSYM
 
 re: fclean all
 
 norm:
-	@printf "\e[31m"; norminette srcs includes Libft tests/**/test.c | grep -v ": OK!" \
+	@printf "\e[31m"; norminette | grep -v ": OK!" \
+	&& exit 1 \
 	|| printf "\e[32m%s\n\e[m" "Norm OK!"; printf "\e[m"
 
 $(DSTRCTR):
-	curl -O https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/destructor.c
-	mv destructor.c $(DSTRCTR)
+	curl https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/destructor.c > $(DSTRCTR)
 
-Darwin_leak: $(LIBFT) $(DSTRCTR) $(OBJS) $(B_OBJS)
+Darwin_leak: $(LIBFT) $(DSTRCTR) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) ./tests/destructor.c -o $(NAME) $(LIBS)
-	$(CC) $(CFLAGS) $(B_OBJS) ./tests/destructor.c -o $(B_NAME) $(LIBS)
 
-Linux_leak: $(LIBFT) $(OBJS) $(B_OBJS)
-	$(CC) $(CFLAGS) -fsanitize=leak $(OBJS) -o $(NAME) $(LIBS)
-	$(CC) $(CFLAGS) -fsanitize=leak $(B_OBJS) -o $(B_NAME) $(LIBS)
+Linux_leak: $(LIBFT) $(OBJS)
+	$(CC) $(CFLAGS) -fsanitize=address $(OBJS) -o $(NAME) $(LIBS)
 
 leak: $(shell uname)_leak
+
+Darwin_leak_bonus: $(LIBFT) $(DSTRCTR) $(B_OBJS)
+	$(CC) $(CFLAGS) $(B_OBJS) ./tests/destructor.c -o $(B_NAME) $(LIBS)
+
+Linux_leak_bonus: $(LIBFT) $(B_OBJS)
+	$(CC) $(CFLAGS) -fsanitize=address $(B_OBJS) -o $(B_NAME) $(LIBS)
+
+leak_bonus: $(shell uname)_leak_bonus
 
 tests: leak
 	bash auto_test.sh $(TEST)\
