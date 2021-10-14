@@ -32,6 +32,7 @@ bonus: $(B_FLG)
 
 $(B_FLG): $(LIBFT) $(B_OBJS)
 	$(CC) $(CFLAGS) $(B_OBJS) -o $(NAME) $(LIBS)
+	touch $(B_FLG)
 
 clean:
 	$(MAKE) clean -C ./Libft
