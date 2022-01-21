@@ -1,22 +1,33 @@
+#############
+# Variables #
+#############
+
 NAME	:= program_name
 B_NAME	:= program_name_b
 CC		:= gcc
 INCLUDE	:= -I./includes
 CFLAGS	:= -g -Wall -Werror -Wextra $(INCLUDE)
 LIBS	:=
-VPATH	:= srcs
+VPATH	:= srcs/
 
 SRCS	:= main.c
-OBJS	:= $(SRCS:%.c=$(SRCDIR)%.o)
+SRCDIRS	 = $(call uniq, $(filter-out ./, $(dir $(SRCS))))
+
+OBJDIR	:= objs/
+OBJDIRS	 = $(addprefix $(OBJDIR), $(SRCDIRS))
+OBJS	:= $(addprefix $(OBJDIR), $(SRCS:%.c=%.o))
+
 B_SRCS	:= main_bonus.c
 B_OBJS	:= $(B_SRCS:%.c=$(SRCDIR)%.o)
 B_FLG	:= .bonus_flg
+
 DSTRCTR	:= ./tests/destructor.c
 
-all: $(NAME)
+#################
+# General rules #
+#################
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
@@ -28,39 +39,59 @@ $(B_FLG): $(B_OBJS)
 	touch $(B_FLG)
 
 clean: FORCE
-	rm -f $(OBJS) $(B_OBJS)
+	$(RM) $(OBJS) $(B_OBJS)
 
 fclean: clean
-	rm -f $(NAME) $(B_NAME)
-	rm -rf $(NAME).dSYM $(B_NAME).dSYM
+	$(RM) $(NAME) $(B_NAME)
+	$(RM) -r $(NAME).dSYM $(B_NAME).dSYM
 
 re: fclean all
 
 norm: FORCE
-	@printf "\e[31m"; norminette | grep -v ": OK!" \
+	@printf "$(RED)"; norminette | grep -v ": OK!" \
 	&& exit 1 \
-	|| printf "\e[32m%s\n\e[m" "Norm OK!"; printf "\e[m"
+	|| printf "$(GREEN)%s\n$(END)" "Norm OK!"
+
+$(OBJDIRS):
+	mkdir -p $@
+
+$(OBJDIR)%.o: %.c $(OBJDIRS)
+	@printf "$(THIN)$(ITALIC)"
+	$(CC) $(CFLAGS) -c $< -o $@
+	@printf "$(END)"
+
+FORCE:
+
+###############
+# Debug rules #
+###############
 
 $(DSTRCTR):
 	curl https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/destructor.c > $(DSTRCTR)
 
+sani: $(OBJS)
+	$(CC) $(CFLAGS) -fsanitize=address $(OBJS) -o $(NAME) $(LIBS)
+
 Darwin_leak: $(DSTRCTR) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(DSTRCTR) -o $(NAME) $(LIBS)
 
-Linux_leak: $(OBJS)
-	$(CC) $(CFLAGS) -fsanitize=address $(OBJS) -o $(NAME) $(LIBS)
+Linux_leak: sani
 
-leak: FORCE $(shell uname)_leak
+leak: $(shell uname)_leak
 
-Darwin_leak_bonus: $(DSTRCTR) $(B_OBJS)
-	$(CC) $(CFLAGS) $(B_OBJS) $(DSTRCTR) -o $(B_NAME) $(LIBS)
-
-Linux_leak_bonus: $(B_OBJS)
+bonus_sani: $(B_OBJS)
 	$(CC) $(CFLAGS) -fsanitize=address $(B_OBJS) -o $(B_NAME) $(LIBS)
 
-leak_bonus: FORCE $(shell uname)_leak_bonus
+bonus_Darwin_leak: $(DSTRCTR) $(B_OBJS)
+	$(CC) $(CFLAGS) $(B_OBJS) $(DSTRCTR) -o $(B_NAME) $(LIBS)
 
-FORCE:
+bonus_Linux_leak: bonus_sani
+
+bonus_leak: bonus_$(shell uname)_leak
+
+##############
+# Test rules #
+##############
 
 CXX			:= clang++
 CXXFLAG		:= -std=c++11 -DDEBUG -g -fsanitize=integer -fsanitize=address -Wno-writable-strings
@@ -72,7 +103,7 @@ gTest		:= $(gTestDir)/gtest $(gTestDir)/$(gTestVer)
 TESTDIR		:= ./tests/
 TESTSRCS_C	:= $(filter-out main.c,$(SRCS))
 TESTSRCS_CPP:= $(wildcard $(TESTDIR)*.cpp)
-TESTOBJS	:= $(TESTSRCS_C:%.c=$(SRCDIR)%.o) \
+TESTOBJS	:= $(addprefix $(SRCDIR), $(TESTSRCS_C:%.c=%.o)) \
 				$(TESTSRCS_CPP:%.cpp=%.o)
 
 %.o: %.cpp
@@ -100,3 +131,27 @@ test_fclean: test_clean
 	$(RM) -r tester tester.dSYM
 
 test_re: test_fclean test
+
+#############
+# Functions #
+#############
+
+uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
+
+##########
+# Colors #
+##########
+
+END		= \e[0m
+BOLD	= \e[1m
+THIN	= \e[2m
+ITALIC	= \e[3m
+U_LINE	= \e[4m
+BLACK	= \e[30m
+RED		= \e[31m
+GREEN	= \e[32m
+YELLOW	= \e[33m
+BLUE	= \e[34m
+PURPLE	= \e[35m
+CYAN	= \e[36m
+WHITE	= \e[37m
