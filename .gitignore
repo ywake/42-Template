@@ -10,7 +10,6 @@
 !*.h
 !srcs
 !srcs/**
-!objs
 !includes
 !auto_test.sh
 !tests

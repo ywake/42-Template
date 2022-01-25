@@ -17,7 +17,7 @@ LIBS	:=
 VPATH	:= srcs/
 
 SRCS	:= main.c
-SRCDIRS	:= $(call uniq, $(filter-out ./, $(dir $(SRCS))))
+SRCDIRS	:= $(call uniq, $(dir $(SRCS)))
 
 OBJDIR	:= objs/
 OBJDIRS	:= $(addprefix $(OBJDIR), $(SRCDIRS))
