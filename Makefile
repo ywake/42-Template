@@ -66,6 +66,7 @@ $(OBJDIR)%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 	@printf "$(END)"
 
+.PHONY: FORCE
 FORCE:
 
 ###############
