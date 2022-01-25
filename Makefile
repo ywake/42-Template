@@ -1,4 +1,10 @@
 #############
+# Functions #
+#############
+
+uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
+
+#############
 # Variables #
 #############
 
@@ -11,10 +17,10 @@ LIBS	:=
 VPATH	:= srcs/
 
 SRCS	:= main.c
-SRCDIRS	 = $(call uniq, $(filter-out ./, $(dir $(SRCS))))
+SRCDIRS	:= $(call uniq, $(filter-out ./, $(dir $(SRCS))))
 
 OBJDIR	:= objs/
-OBJDIRS	 = $(addprefix $(OBJDIR), $(SRCDIRS))
+OBJDIRS	:= $(addprefix $(OBJDIR), $(SRCDIRS))
 OBJS	:= $(addprefix $(OBJDIR), $(SRCS:%.c=%.o))
 
 B_SRCS	:= main_bonus.c
@@ -29,12 +35,12 @@ DSTRCTR	:= ./tests/destructor.c
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJDIRS) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
 
 bonus: $(B_FLG)
 
-$(B_FLG): $(B_OBJS)
+$(B_FLG): $(OBJDIRS) $(B_OBJS)
 	$(CC) $(CFLAGS) $(B_OBJS) -o $(NAME) $(LIBS)
 	touch $(B_FLG)
 
@@ -55,7 +61,7 @@ norm: FORCE
 $(OBJDIRS):
 	mkdir -p $@
 
-$(OBJDIR)%.o: %.c $(OBJDIRS)
+$(OBJDIR)%.o: %.c
 	@printf "$(THIN)$(ITALIC)"
 	$(CC) $(CFLAGS) -c $< -o $@
 	@printf "$(END)"
@@ -69,20 +75,20 @@ FORCE:
 $(DSTRCTR):
 	curl https://gist.githubusercontent.com/ywake/793a72da8cdae02f093c02fc4d5dc874/raw/destructor.c > $(DSTRCTR)
 
-sani: $(OBJS)
+sani: $(OBJDIRS) $(OBJS)
 	$(CC) $(CFLAGS) -fsanitize=address $(OBJS) -o $(NAME) $(LIBS)
 
-Darwin_leak: $(DSTRCTR) $(OBJS)
+Darwin_leak: $(DSTRCTR) $(OBJDIRS) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $(DSTRCTR) -o $(NAME) $(LIBS)
 
 Linux_leak: sani
 
 leak: $(shell uname)_leak
 
-bonus_sani: $(B_OBJS)
+bonus_sani: $(OBJDIRS) $(B_OBJS)
 	$(CC) $(CFLAGS) -fsanitize=address $(B_OBJS) -o $(B_NAME) $(LIBS)
 
-bonus_Darwin_leak: $(DSTRCTR) $(B_OBJS)
+bonus_Darwin_leak: $(DSTRCTR) $(OBJDIRS) $(B_OBJS)
 	$(CC) $(CFLAGS) $(B_OBJS) $(DSTRCTR) -o $(B_NAME) $(LIBS)
 
 bonus_Linux_leak: bonus_sani
@@ -131,12 +137,6 @@ test_fclean: test_clean
 	$(RM) -r tester tester.dSYM
 
 test_re: test_fclean test
-
-#############
-# Functions #
-#############
-
-uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
 ##########
 # Colors #
